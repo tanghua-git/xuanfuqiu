@@ -1,0 +1,40 @@
+# Python 编译/缓存
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+
+# PyInstaller 产物
+build/
+dist/
+*.spec
+*.spec.bak
+
+# 本地配置 / 临时文件
+config.json
+*.tmp
+*.log
+~$*
+
+# 安装包备份(本机 160MB 的 .exe 备份不入仓)
+*.exe.bak
+*.bak
+
+# IDE / 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 本地 Claude 配置(个人配置,不入公开仓库)
+.claude/
+
+# 用户上传的临时课件
+*.html.user

@@ -1,0 +1,5 @@
+PySide6>=6.6,<7.0
+# WebEngine 渲染 HTML 用
+# PySide6 自带 QtWebEngineWidgets,无需额外安装
+# 打包用
+pyinstaller>=6.0
