@@ -152,6 +152,25 @@ QSpinBox:focus, QDoubleSpinBox:focus {
     border: 1px solid #4A90E2;
 }
 
+/* QComboBox 弹出的下拉列表:显式不透明,避免沿用系统浅色主题导致白字白底看不清 */
+QComboBox QAbstractItemView {
+    background: #1F242E;
+    color: #F0F4FB;
+    border: 1px solid #3A4250;
+    selection-background-color: #4A90E2;
+    selection-color: #FFFFFF;
+    outline: 0;
+}
+QComboBox QAbstractItemView::item {
+    color: #F0F4FB;
+    background: transparent;
+    padding: 6px 8px;
+}
+QComboBox QAbstractItemView::item:selected {
+    background: #4A90E2;
+    color: #FFFFFF;
+}
+
 QListWidget {
     background: #0F131A;
     border: 1px solid #3A4250;
