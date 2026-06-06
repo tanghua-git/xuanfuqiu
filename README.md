@@ -2,7 +2,7 @@
 
 > 一颗蓝色的小圆球,静静地浮在你的课件窗口之上。点一下,周围弹出你常用的快捷键 —— 一键打开 HTML 课件、网址、互动小工具。再点一下,全屏置顶播放,**不影响**希沃白板、PPT、国家智慧中小学的运行。
 
-为中学教师课堂演示量身设计。Windows 系统。
+为中学教师课堂演示量身设计。Windows 10/11。
 
 ---
 
@@ -14,6 +14,8 @@
 - **悬浮球/批注工具容易误触** — 鼠标动一下就被吸附,PPT 放映时格外碍眼。
 
 这颗悬浮球默认是**鼠标穿透**的 —— 你感受不到它的存在,直到你主动点它。展开的快捷键按你常用的顺序排列,一键直达。
+
+> 💡 本项目**仅维护精简版**:HTML 渲染走系统自带的 WebView2(Win10 1809+ / Win11 默认已装),不内置 Chromium,安装包约 22MB。Win7 / Win8 用户请手动装一下 WebView2:https://developer.microsoft.com/microsoft-edge/webview2/
 
 ---
 
@@ -34,9 +36,9 @@
 ### 老师用户(直接用)
 
 1. 打开右侧 **Releases** 页面
-2. 下载最新版的 `XuanFuQiu_*_Setup.exe`
+2. 下载 `XuanFuQiu_lite_v1.0_Setup.exe`(约 22 MB)
 3. 双击安装(无需管理员权限)
-4. 桌面 / 开始菜单双击「悬浮球」即可启动
+4. 桌面 / 开始菜单双击「悬浮球课件工具(精简版)」即可启动
 5. **右键悬浮球 → 添加按钮**,把常用的课件挂上去
 
 ### 开发者(从源码运行)
@@ -50,15 +52,15 @@ pip install -r requirements.txt
 python main.py
 ```
 
-打包成安装包:
+打包成安装包(走精简版流程,产物 `XuanFuQiu_lite_v1.0_Setup.exe`):
 
 ```bash
 pip install -r requirements.txt
-python build.py                # 只生成 onedir 目录(可直接运行)
-python build.py --installer    # 再用 Inno Setup 打成单个 Setup.exe
+python build_lite.py                # 只生成 onedir 目录(可直接运行)
+python build_lite.py --installer    # 再用 Inno Setup 打成单个 Setup.exe
 ```
 
-> 打包用的是 `onedir` 模式(生成目录,不是单 exe),这是 PySide6 + QtWebEngine 的官方推荐方案 —— 单 exe 模式下 `QCoreApplication::applicationDirPath()` 指向错误的目录,WebEngine 在别的机器上会启动失败。
+> 精简版用 `onedir` 模式,不是为了 QtWebEngine 兼容(精简版根本不用 WebEngine),而是因为 `build_lite.py` 会在打包后**剪掉 ~580 MB 的 PySide6 用不到的资源**(WebEngine 残留、QML、3D、Charts、PDF、ShaderTools、Linguist、输入法插件、`.pyi`、`.lib` 等),剪枝只能对解开的 onedir 目录生效,onefile 模式做不到。剪完整个 `dist/悬浮球/` 约 76 MB,压成安装包约 22 MB。
 
 ---
 
@@ -75,7 +77,7 @@ python build.py --installer    # 再用 Inno Setup 打成单个 Setup.exe
 | **ESC** 或 鼠标移到屏幕顶部 | 退出 HTML 播放,焦点回到原应用 |
 | **右键** | 弹出菜单:添加按钮 / 设置 / 打开配置目录 / 退出 |
 
-> 💡 第一次打开 HTML 课件时,Chromium 引擎需要几秒钟初始化,之后切换会很快。
+> 💡 HTML 渲染走系统 WebView2,Win11 / 较新的 Win10 已经在 Edge 里预装,首次启动会沿用 Edge 缓存,切换很快。
 
 ---
 
@@ -120,8 +122,20 @@ A:右键 → 设置 → 通用设置 → 取消「启用鼠标穿透」。
 **Q:HTML 代码按钮没反应?**
 A:确认代码是合法 HTML(包含 `<html>` 标签)。代码会被写到临时文件,路径在 `%APPDATA%\XuanFuQiu\tmp\`,可以打开看看具体写进去的内容。
 
-**Q:打包后到其他机器运行,显示「QtWebEngine 未能加载」?**
-A:这是 PyInstaller 单文件模式的已知问题。**请用项目自带的 `build.py` 重新打包**(`onedir` 模式即可)。如果诊断界面列出了具体缺失文件,通常补回去就行。
+**Q:点击 HTML 按钮后显示「QtWebView 未能加载」?**
+A:系统没装 WebView2。Win10 1809+ / Win11 默认带;Win10 旧版 / Win8 / Win7 需要手动装:
+https://developer.microsoft.com/microsoft-edge/webview2/
+装完重启悬浮球即可。
+
+**Q:想自己改源码重新打包,装好 Inno Setup 6 后还是提示找不到 ISCC.exe?**
+A:`build_lite.py` 默认在以下路径找 ISCC(顺序):
+- 环境变量 `INNO_SETUP` 指向的路径
+- `C:\Program Files (x86)\Inno Setup 6\ISCC.exe`
+- `C:\Program Files\Inno Setup 6\ISCC.exe`
+- `C:\InnoSetup6\ISCC.exe`(便携解压到这里就能识别)
+- PATH 里的 `ISCC` / `ISCC.exe`
+
+便携版推荐: `innosetup-6.5.3.exe /SP- /SILENT /EXTRACT=C:\InnoSetup6 /NORESTART`
 
 ---
 
@@ -130,20 +144,19 @@ A:这是 PyInstaller 单文件模式的已知问题。**请用项目自带的 `b
 | 用途 | 技术 |
 |---|---|
 | GUI | PySide6 (Qt for Python) |
-| HTML 渲染 | QtWebEngineWidgets(Chromium 内核) |
-| 打包 | PyInstaller + Inno Setup |
+| HTML 渲染 | QtWebView(走系统 WebView2,Edge 内核) |
+| 打包 | PyInstaller(onedir + 自动剪枝) + Inno Setup |
 
 ---
 
 ## 项目结构
 
 ```
-课件悬浮球工具/
+xuanfuqiu/
 ├── main.py                  # 入口
-├── build.py                 # 打包脚本
-├── build_lite.py            # 精简版打包脚本
+├── build_lite.py            # 打包脚本(onedir + 剪枝 + Inno Setup)
 ├── requirements.txt
-├── installer.iss            # Inno Setup 脚本
+├── installer_lite.iss       # Inno Setup 脚本
 ├── core/                    # 核心模块
 │   ├── config.py            # 配置管理(JSON + 原子写)
 │   └── paths.py             # 路径工具
@@ -153,12 +166,11 @@ A:这是 PyInstaller 单文件模式的已知问题。**请用项目自带的 `b
 │   ├── button_item.py       # 单个按钮
 │   ├── button_edit.py       # 添加/编辑按钮对话框
 │   ├── settings_dialog.py   # 设置主窗口
-│   ├── player_window.py     # HTML 全屏播放窗
+│   ├── player_window.py     # HTML 全屏播放窗(QWebView + WebView2)
 │   └── styles.py            # QSS 样式
 ├── runtime/                 # 运行时
 │   ├── html_runner.py       # HTML 统一执行器
 │   └── auto_start.py        # 开机自启(注册表)
-├── lite/                    # 精简版实验代码
 └── resources/               # 图标等
 ```
 

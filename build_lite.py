@@ -432,25 +432,13 @@ def build_installer(root: Path, exe: Path) -> Path | None:
         print("\n未检测到 Inno Setup 6(ISCC.exe),跳过安装包生成。")
         return None
 
-    iss_src = root / "installer.iss"
+    iss_src = root / "installer_lite.iss"
     if not iss_src.exists():
         print(f"未找到 {iss_src},跳过安装包生成。")
         return None
-    src_text = iss_src.read_text(encoding="utf-8")
-    # 改两个地方:
-    # 1. 显示名加 "(精简版)"
-    # 2. 安装包文件名加 _lite 后缀,避免和原版冲突
-    src_text = src_text.replace(
-        '#define MyAppName "悬浮球课件工具"',
-        '#define MyAppName "悬浮球课件工具(精简版)"',
-    )
-    src_text = src_text.replace(
-        'OutputBaseFilename={#MyAppNameEn}_v{#MyAppVersion}_Setup',
-        'OutputBaseFilename={#MyAppNameEn}_lite_v{#MyAppVersion}_Setup',
-    )
-    # 输出文件名 (因为 onedir 走 wildcard 模式,无需改 [Files])
-    lite_iss = root / "installer_lite.iss"
-    lite_iss.write_text(src_text, encoding="utf-8")
+    # 项目本身就是精简版,installer_lite.iss 已是最终版(显示名带"精简版"、文件名带 _lite),
+    # 直接拿这个文件当 ISCC 输入,无需再做替换。
+    lite_iss = iss_src
 
     print(f"\n用 {iscc} 生成 lite 安装包...")
     code = subprocess.call([iscc, str(lite_iss)], cwd=root)
